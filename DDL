@@ -17,5 +17,5 @@ CREATE TABLE actors (
  	films films[],
 	isactive BOOLEAN,
 	quality_class quality_class,
- 	PRIMARY KEY(actorid)
+ 	PRIMARY KEY(actorid,currentyear)
 )
