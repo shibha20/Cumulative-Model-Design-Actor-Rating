@@ -1,9 +1,9 @@
 DROP TABLE IF EXISTS actors;
+DROP TYPE IF EXISTS films;
 /*create a new data type*/
 CREATE TYPE films AS (film TEXT, 
 							votes INTEGER, 
-							rating REAL,
-							filmid TEXT);
+							rating REAL);
 
 
 CREATE TYPE quality_class as ENUM('star','good','average','bad');
@@ -14,8 +14,9 @@ CREATE TABLE actors (
  	actor TEXT,
  	actorid TEXT,
 	currentyear INTEGER,
+	filmid TEXT, 
  	films films[],
 	isactive BOOLEAN,
 	quality_class quality_class,
- 	PRIMARY KEY(actorid,currentyear)
+ 	PRIMARY KEY(actorid,currentyear,filmid)
 )
