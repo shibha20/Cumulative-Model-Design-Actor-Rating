@@ -41,10 +41,15 @@ The primary key for this dataset is (`actor_id`, `film_id`).
    - `is_active`: A BOOLEAN field that indicates whether an actor is currently active in the film industry (i.e., making films this year).
   
 2. **Cumulative table generation query:** Write a query that populates the `actors` table one year at a time.
-  
+
+
+  <img width="1040" height="572" alt="Screenshot 2025-08-05 at 10 19 58 PM" src="https://github.com/user-attachments/assets/49a7c234-730b-4be0-b76c-ea2369737748" />
+
 3. **DDL for `actors_history_scd` table:** Create a DDL for an `actors_history_scd` table with the following features:
    - Implements type 2 dimension modeling (i.e., includes `start_date` and `end_date` fields).
    - Tracks `quality_class` and `is_active` status for each actor in the `actors` table.
+  
+   - 
     
 4. **Backfill query for `actors_history_scd`:** Write a "backfill" query that can populate the entire `actors_history_scd` table in a single query.
   
