@@ -42,8 +42,9 @@ The primary key for this dataset is (`actor_id`, `film_id`).
   
 2. **Cumulative table generation query:** Write a query that populates the `actors` table one year at a time.
 
+<img width="1093" height="308" alt="Screenshot 2025-08-06 at 4 06 48 PM" src="https://github.com/user-attachments/assets/7098e154-1d9c-40bb-89c7-413d09b8bff9" />
 
-  <img width="1040" height="572" alt="Screenshot 2025-08-05 at 10 19 58 PM" src="https://github.com/user-attachments/assets/49a7c234-730b-4be0-b76c-ea2369737748" />
+  
 
 3. **DDL for `actors_history_scd` table:** Create a DDL for an `actors_history_scd` table with the following features:
    - Implements type 2 dimension modeling (i.e., includes `start_date` and `end_date` fields).
