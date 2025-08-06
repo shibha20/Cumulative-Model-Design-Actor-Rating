@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS actors;
 DROP TYPE IF EXISTS films;
 /*create a new data type*/
 CREATE TYPE films AS (film TEXT, 
-						filmid INTEGER,
+						filmid TEXT,
 							votes INTEGER, 
 							rating REAL);
 
