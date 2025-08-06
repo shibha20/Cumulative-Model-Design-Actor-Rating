@@ -3,31 +3,63 @@ DECLARE
     yr INTEGER;
 BEGIN
     FOR yr IN 1970..2021 LOOP
-        WITH today AS (
+        
+WITH yesterday AS (
+            SELECT * FROM actors
+            WHERE currentyear = yr-1
+		),
+		today AS (
             SELECT * FROM actor_films
             WHERE year = yr
         ), avg_rating AS (
             SELECT actorid, AVG(rating) AS avg_rating
             FROM today
             GROUP BY actorid
-        )
-	INSERT INTO actors
-	SELECT t.actor as actor,
-		t.actorid as actorid,
-		t.year as currentyear,
-		t.filmid  as filmid,
-		ARRAY[ROW(t.film, t.votes, t.rating)::films] AS films,
-		CASE WHEN t.year = 2025 THEN TRUE ELSE FALSE
-		END AS isactive,
-	
-		CASE WHEN ar.avg_rating >8 THEN 'star'
-					WHEN ar.avg_rating > 7 AND ar.avg_rating <= 8 THEN 'good'
-					WHEN ar.avg_rating > 6 AND ar.avg_rating <= 7 THEN 'average'
-					ELSE 'bad'
+        ),agg_films AS (
+			SELECT a.actor,a.actorid, a.year,
+			array_agg(ROW(a.film,a.filmid, a.votes, av.avg_rating)::films) as actor_films
+			FROM actor_films a
+			JOIN avg_rating av ON 
+			a.actorid = av.actorid
+            WHERE year = yr
+			GROUP BY a.actor,a.actorid, a.year
+		),qualityandactive AS(
+			SELECT t.actor as actor,		t.actorid as actorid,
+		yr as currentyear,
+		MAX(CASE WHEN t.year = yr THEN 1 ELSE 0
+		END) AS isactive,
+		CASE WHEN MAX(t.film) IS NOT NULL THEN 
+			CASE 
+				  WHEN MAX(ar.avg_rating) > 8 THEN 'star'
+				  WHEN MAX(ar.avg_rating) > 7 THEN 'good'
+				  WHEN MAX(ar.avg_rating) > 6 THEN 'average'
+				  ELSE 'bad'
 				END::quality_class
-
+			ELSE MAX(y.quality_class)
+		END as quality_class
 		FROM today t 
-		LEFT JOIN avg_rating  ar
-		ON t.actorid = ar.actorid;
+        FULL JOIN yesterday y ON t.actorid = y.actorid
+		LEFT JOIN avg_rating  ar ON t.actorid = ar.actorid
+		FULL JOIN agg_films a ON t.actorid =a.actorid
+		AND t.year =a.year
+		GROUP BY 1,2,3
+		)
+	INSERT INTO actors
+	SELECT COALESCE(t.actor,y.actor) as actor,
+		COALESCE(t.actorid,y.actorid) as actorid,
+		yr as currentyear,
+		--insert the first record
+		CASE WHEN y.films is NULL THEN
+				t.actor_films				
+		--append the new records to old records
+			 WHEN t.actor_films is NOT NULL THEN y.films || t.actor_films
+		--leave the first record as it is if they are new records at all (the player has retired)
+			ELSE y.films END AS films,
+		CASE WHEN qa.isactive= 1 THEN TRUE ELSE FALSE END AS isactive,
+		qa.quality_class
+		FROM agg_films t 
+        FULL JOIN yesterday y ON t.actorid = y.actorid 
+		LEFT JOIN qualityandactive qa ON t.actorid  =qa.actorid
+		AND t.year =qa.currentyear;
 	END LOOP;
 END $$;
