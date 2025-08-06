@@ -48,19 +48,19 @@ The primary key for this dataset is (`actor_id`, `film_id`).
 3. **DDL for `actors_history_scd` table:** Create a DDL for an `actors_history_scd` table with the following features:
    - Implements type 2 dimension modeling (i.e., includes `start_date` and `end_date` fields).
    - Tracks `quality_class` and `is_active` status for each actor in the `actors` table.
-  
-   Before:
+
+
+5. **Backfill query for `actors_history_scd`:** Write a "backfill" query that can populate the entire `actors_history_scd` table in a single query.
+
+    Before:
 <img width="837" height="312" alt="Screenshot 2025-08-06 at 2 20 36 PM" src="https://github.com/user-attachments/assets/d0f36bd0-a294-4cfa-9ab6-0191cfd032d5" />
 
 
    After:
    
 <img width="1025" height="272" alt="Screenshot 2025-08-06 at 2 22 20 PM" src="https://github.com/user-attachments/assets/e661fd89-024f-4df9-9412-32aa8577d903" />
-
-
-5. **Backfill query for `actors_history_scd`:** Write a "backfill" query that can populate the entire `actors_history_scd` table in a single query.
   
-6. **Incremental query for `actors_history_scd`:** Write an "incremental" query that combines the previous year's SCD data with new incoming data from the `actors` table.
+7. **Incremental query for `actors_history_scd`:** Write an "incremental" query that combines the previous year's SCD data with new incoming data from the `actors` table.
 
 
 
