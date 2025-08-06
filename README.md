@@ -49,11 +49,16 @@ The primary key for this dataset is (`actor_id`, `film_id`).
    - Implements type 2 dimension modeling (i.e., includes `start_date` and `end_date` fields).
    - Tracks `quality_class` and `is_active` status for each actor in the `actors` table.
   
-   - 
-    
-4. **Backfill query for `actors_history_scd`:** Write a "backfill" query that can populate the entire `actors_history_scd` table in a single query.
+   Before:
+
+
+   After:
+   
+    <img width="1044" height="430" alt="Screenshot 2025-08-06 at 2 18 55 PM" src="https://github.com/user-attachments/assets/edd7955a-be06-4d6d-ba3d-21644e4ad8ff" />
+
+5. **Backfill query for `actors_history_scd`:** Write a "backfill" query that can populate the entire `actors_history_scd` table in a single query.
   
-5. **Incremental query for `actors_history_scd`:** Write an "incremental" query that combines the previous year's SCD data with new incoming data from the `actors` table.
+6. **Incremental query for `actors_history_scd`:** Write an "incremental" query that combines the previous year's SCD data with new incoming data from the `actors` table.
 
 
 
