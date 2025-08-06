@@ -1,0 +1,57 @@
+
+
+WITH avg_rating AS (
+            SELECT 
+		    a.actorid,a.actor,
+		    a.currentyear,
+		    AVG(f.rating) AS avg_rating
+		  FROM actors a
+		  CROSS JOIN LATERAL unnest(a.films) AS f
+		  GROUP BY a.actorid,a.actor, a.currentyear),
+	checks as (
+		SELECT *, CASE WHEN ar.avg_rating >8 THEN 'star'
+					WHEN ar.avg_rating > 7 AND ar.avg_rating <= 8 THEN 'good'
+					WHEN ar.avg_rating > 6 AND ar.avg_rating <= 7 THEN 'average'
+					ELSE 'bad'
+				END::quality_class,
+		CASE WHEN ar.currentyear = 2025 THEN TRUE ELSE FALSE
+		END AS isactive
+		FROM avg_rating ar
+	), changetracker AS (
+		SELECT *, 
+		CASE WHEN quality_class <> 
+		LEAD (quality_class,1) OVER(PARTITION BY actorid order by currentyear) 
+		THEN 1 ELSE 0 END AS qualitychanged,
+		CASE WHEN isactive <> 
+		LEAD (isactive,1) OVER(PARTITION BY actorid order by currentyear) 
+		THEN 1 ELSE 0 END AS activechanged
+		FROM checks c1 ),
+		historytable AS (
+			SELECT *,CASE WHEN LEAD (quality_class,1) 
+			OVER(PARTITION BY actorid order by currentyear) 
+			IS NULL THEN  quality_class 
+			ELSE LEAD (quality_class,1) OVER(PARTITION BY actorid order by currentyear)
+			END AS  end_quality_class,	
+			CASE WHEN LEAD (isactive,1) 
+			OVER(PARTITION BY actorid order by currentyear) 
+			IS NULL THEN  isactive 
+			ELSE LEAD (isactive,1) OVER(PARTITION BY actorid order by currentyear)
+			END AS  end_isactive	
+			FROM changetracker f
+		),identifynochanges AS (
+		SELECT *, 
+		SUM(qualitychanged) OVER(PARTITION BY actorid ORDER BY currentyear) AS qualitystreakcount,
+		SUM(activechanged) OVER(PARTITION BY actorid ORDER BY currentyear) AS activestreakcount
+		FROM historytable f
+		)
+
+SELECT DISTINCT actorid, actor,
+FIRST_VALUE(currentyear)  OVER(PARTITION BY actorid,qualitystreakcount,activestreakcount) as start_year,
+LAST_VALUE(currentyear)  OVER(PARTITION BY actorid,qualitystreakcount,activestreakcount) as end_year,
+'2025' AS currentyear,
+FIRST_VALUE(quality_class)  OVER(PARTITION BY actorid,qualitystreakcount,activestreakcount) as start_quality_class,
+LAST_VALUE(quality_class)  OVER(PARTITION BY actorid,qualitystreakcount,activestreakcount) as end_quality_class,
+FIRST_VALUE(isactive)  OVER(PARTITION BY actorid,qualitystreakcount,activestreakcount) as start_isactive,
+LAST_VALUE(isactive)  OVER(PARTITION BY actorid,qualitystreakcount,activestreakcount) as end_isactive
+FROM identifynochanges
+ORDER BY 1,3
