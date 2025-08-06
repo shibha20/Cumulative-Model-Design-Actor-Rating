@@ -55,7 +55,8 @@ The primary key for this dataset is (`actor_id`, `film_id`).
 
    After:
    
-    <img width="1044" height="430" alt="Screenshot 2025-08-06 at 2 18 55 PM" src="https://github.com/user-attachments/assets/edd7955a-be06-4d6d-ba3d-21644e4ad8ff" />
+<img width="1025" height="272" alt="Screenshot 2025-08-06 at 2 22 20 PM" src="https://github.com/user-attachments/assets/e661fd89-024f-4df9-9412-32aa8577d903" />
+
 
 5. **Backfill query for `actors_history_scd`:** Write a "backfill" query that can populate the entire `actors_history_scd` table in a single query.
   
