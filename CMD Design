@@ -12,19 +12,24 @@ WITH yesterday as (
     GROUP BY actorid
 )
 
+INSERT INTO actors
 SELECT COALESCE (t.actor, y.actor) as actor,
 	COALESCE (t.actorid, y.actorid) as actorid,
 	COALESCE (t.year, y.currentyear) as currentyear,
+	COALESCE (t.filmid, y.filmid) as filmid,
 	--insert the first record
 	CASE WHEN y.films is NULL THEN
-			ARRAY[ROW(t.film, t.votes, t.rating,t.filmid)::films]
+			ARRAY[ROW(t.film, t.votes, t.rating)::films]
 			
 	--append the new records to old records
 		 WHEN t.film is NOT NULL THEN y.films || 
-		 ARRAY[ROW(t.film, t.votes, t.rating,t.filmid)::films]
+		 ARRAY[ROW(t.film, t.votes, t.rating)::films]
 
 	--leave the first record as it is if they are new records at all (the player has retired)
 		ELSE y.films END AS films,
+
+	CASE WHEN COALESCE (t.year, y.currentyear) = 2025 THEN TRUE ELSE FALSE
+	END AS isactive,
 
 	--assign scoring class based on current season's data if they are playing 
 	--else pull it from the last one before they retired
@@ -43,5 +48,3 @@ SELECT COALESCE (t.actor, y.actor) as actor,
 	ON t.actorid = y.actorid
 	LEFT JOIN avg_rating  ar
 	ON COALESCE(t.actorid, y.actorid) = ar.actorid
-
-
