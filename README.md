@@ -50,6 +50,7 @@ The primary key for this dataset is (`actor_id`, `film_id`).
    - Tracks `quality_class` and `is_active` status for each actor in the `actors` table.
   
    Before:
+<img width="837" height="312" alt="Screenshot 2025-08-06 at 2 20 36 PM" src="https://github.com/user-attachments/assets/d0f36bd0-a294-4cfa-9ab6-0191cfd032d5" />
 
 
    After:
