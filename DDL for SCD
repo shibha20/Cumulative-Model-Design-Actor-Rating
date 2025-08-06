@@ -1,0 +1,17 @@
+DROP TABLE IF EXISTS actors_history_scd;
+
+CREATE TABLE actors_history_scd(
+	actorid TEXT, 
+	actor TEXT,
+	start_year INTEGER, 
+	end_year INTEGER,
+	currentyear INTEGER,
+	start_quality_class quality_class,
+	end_quality_class quality_class,
+	start_isactive BOOLEAN, 
+	end_isactive BOOLEAN, 
+	PRIMARY KEY(actorid,start_year)
+)
+
+
+
