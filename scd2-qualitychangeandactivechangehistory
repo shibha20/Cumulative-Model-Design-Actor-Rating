@@ -43,15 +43,20 @@ WITH avg_rating AS (
 		SUM(qualitychanged) OVER(PARTITION BY actorid ORDER BY currentyear) AS qualitystreakcount,
 		SUM(activechanged) OVER(PARTITION BY actorid ORDER BY currentyear) AS activestreakcount
 		FROM historytable f
-		)
+		),finaltable AS(SELECT DISTINCT actorid, actor,
+		FIRST_VALUE(currentyear)  OVER(PARTITION BY actorid,qualitystreakcount,activestreakcount) as start_year,
+		LAST_VALUE(currentyear)  OVER(PARTITION BY actorid,qualitystreakcount,activestreakcount) as end_year,
+		2025 AS currentyear,
+		FIRST_VALUE(quality_class)  OVER(PARTITION BY actorid,qualitystreakcount,activestreakcount) as start_quality_class,
+		LAST_VALUE(quality_class)  OVER(PARTITION BY actorid,qualitystreakcount,activestreakcount) as end_quality_class,
+		FIRST_VALUE(isactive)  OVER(PARTITION BY actorid,qualitystreakcount,activestreakcount) as start_isactive,
+		LAST_VALUE(isactive)  OVER(PARTITION BY actorid,qualitystreakcount,activestreakcount) as end_isactive
+		FROM identifynochanges)
 
-SELECT DISTINCT actorid, actor,
-FIRST_VALUE(currentyear)  OVER(PARTITION BY actorid,qualitystreakcount,activestreakcount) as start_year,
-LAST_VALUE(currentyear)  OVER(PARTITION BY actorid,qualitystreakcount,activestreakcount) as end_year,
-'2025' AS currentyear,
-FIRST_VALUE(quality_class)  OVER(PARTITION BY actorid,qualitystreakcount,activestreakcount) as start_quality_class,
-LAST_VALUE(quality_class)  OVER(PARTITION BY actorid,qualitystreakcount,activestreakcount) as end_quality_class,
-FIRST_VALUE(isactive)  OVER(PARTITION BY actorid,qualitystreakcount,activestreakcount) as start_isactive,
-LAST_VALUE(isactive)  OVER(PARTITION BY actorid,qualitystreakcount,activestreakcount) as end_isactive
-FROM identifynochanges
-ORDER BY 1,3
+INSERT INTO actors_history_scd(
+	SELECT actorid,actor,start_year,end_year,
+	currentyear, start_quality_class,end_quality_class,
+	start_isactive,end_isactive
+	FROM finaltable
+)
+
