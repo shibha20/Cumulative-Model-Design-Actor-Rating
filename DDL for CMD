@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS actors;
 DROP TYPE IF EXISTS films;
 /*create a new data type*/
 CREATE TYPE films AS (film TEXT, 
+						filmid INTEGER,
 							votes INTEGER, 
 							rating REAL);
 
@@ -14,9 +15,8 @@ CREATE TABLE actors (
  	actor TEXT,
  	actorid TEXT,
 	currentyear INTEGER,
-	filmid TEXT, 
  	films films[],
 	isactive BOOLEAN,
 	quality_class quality_class,
- 	PRIMARY KEY(actorid,currentyear,filmid)
+ 	PRIMARY KEY(actorid,currentyear)
 )
