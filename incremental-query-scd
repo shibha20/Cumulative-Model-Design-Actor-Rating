@@ -34,7 +34,7 @@ presentaggdata AS (
 		p.actor, 
 		CASE 
 			WHEN pa.end_quality_class::TEXT = p.quality_class::TEXT THEN pa.start_year 
-			ELSE pa.currentyear 
+			ELSE pa.newyear 
 		END AS start_year,
 		CASE 
 			WHEN pa.end_quality_class::TEXT = p.quality_class::TEXT THEN  lastyear_val.newyear
@@ -49,8 +49,7 @@ presentaggdata AS (
 		CASE WHEN p.currentyear = lastyear_val.newyear THEN TRUE ELSE FALSE END AS start_isactive,
 		NULL AS end_isactive
 	FROM present p
-	INNER JOIN past pa ON pa.actorid = p.actorid,lastyear_val 
+	FULL OUTER JOIN past pa ON pa.actorid = p.actorid,lastyear_val 
 )
 SELECT * FROM newdata
 order by 2
-
