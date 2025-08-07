@@ -63,5 +63,10 @@ The primary key for this dataset is (`actor_id`, `film_id`).
   
 7. **Incremental query for `actors_history_scd`:** Write an "incremental" query that combines the previous year's SCD data with new incoming data from the `actors` table.
 
+<img width="1114" height="172" alt="Screenshot 2025-08-06 at 9 04 26 PM" src="https://github.com/user-attachments/assets/36b3aa9b-02bc-4d68-9632-b8c67efdaf69" />
+
+Adding data for the new year. Example: 1978 to 1979
+
+<img width="1131" height="158" alt="Screenshot 2025-08-06 at 9 06 14 PM" src="https://github.com/user-attachments/assets/eff77edb-1e61-43bb-af4a-1f9ceda43165" />
 
 
