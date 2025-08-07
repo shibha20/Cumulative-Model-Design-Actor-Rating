@@ -1,12 +1,12 @@
 --append 2021 data to 2016 data
 WITH lastyear_val AS (
-	SELECT 2016 AS lastyear,2021 AS newyear
+	SELECT 1978 AS lastyear,1979 AS newyear
 ),
---got new the record
+--got old record
 past AS (
 	SELECT * 
 	FROM actors_history_scd, lastyear_val
-	WHERE start_year = lastyear_val.lastyear
+	WHERE start_year = lastyear_val.lastyear or end_year = lastyear_val.lastyear
 --unnest present data 
 ),unnestedrating as (
 	SELECT
@@ -33,7 +33,7 @@ presentaggdata AS (
 		p.actorid, 
 		p.actor, 
 		CASE 
-			WHEN pa.end_quality_class::TEXT = p.quality_class::TEXT THEN pa.start_year 
+			WHEN pa.end_quality_class::TEXT = p.quality_class::TEXT THEN pa.start_year
 			ELSE pa.newyear 
 		END AS start_year,
 		CASE 
@@ -51,5 +51,6 @@ presentaggdata AS (
 	FROM present p
 	FULL OUTER JOIN past pa ON pa.actorid = p.actorid,lastyear_val 
 )
-SELECT * FROM newdata
-order by 2
+
+
+
