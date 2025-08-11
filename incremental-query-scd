@@ -1,56 +1,80 @@
---append 2021 data to 2016 data
+-- Append 2021 data to 2016 data (example years)
 WITH lastyear_val AS (
-	SELECT 1978 AS lastyear,1979 AS newyear
+    -- Define the years for comparison: old year and new year
+    SELECT 1978 AS lastyear, 1979 AS newyear
 ),
---got old record
+
+-- Get the old records from actors_history_scd for the last year range
 past AS (
-	SELECT * 
-	FROM actors_history_scd, lastyear_val
-	WHERE start_year = lastyear_val.lastyear or end_year = lastyear_val.lastyear
---unnest present data 
-),unnestedrating as (
-	SELECT
-	actor,actorid, currentyear,
-    (UNNEST(films)).rating::real AS filmrating
-	FROM actors,lastyear_val
-	WHERE currentyear = lastyear_val.newyear
-	),
+    SELECT * 
+    FROM actors_history_scd, lastyear_val
+    WHERE start_year = lastyear_val.lastyear OR end_year = lastyear_val.lastyear
+),
+
+-- Unnest the films array for present data to get individual film ratings for the new year
+unnestedrating AS (
+    SELECT
+        actor,
+        actorid,
+        currentyear,
+        (UNNEST(films)).rating::real AS filmrating
+    FROM actors, lastyear_val
+    WHERE currentyear = lastyear_val.newyear
+),
+
+-- Calculate average film rating per actor for the new year
 presentaggdata AS (
-	SELECT actor, actorid, currentyear,AVG(filmrating) as avg_rating
-	FROM unnestedrating
-	GROUP BY actor,actorid, currentyear
-),present AS (
-	SELECT actor,actorid, currentyear,
-	CASE 
-				  WHEN ar.avg_rating > 8 THEN 'star'
-				  WHEN ar.avg_rating > 7 THEN 'good'
-				  WHEN ar.avg_rating > 6 THEN 'average'
-				  ELSE 'bad'
-	END AS quality_class 
-	FROM presentaggdata ar
-),newdata AS (
-	SELECT 
-		p.actorid, 
-		p.actor, 
-		CASE 
-			WHEN pa.end_quality_class::TEXT = p.quality_class::TEXT THEN pa.start_year
-			ELSE pa.newyear 
-		END AS start_year,
-		CASE 
-			WHEN pa.end_quality_class::TEXT = p.quality_class::TEXT THEN  lastyear_val.newyear
-			ELSE lastyear_val.newyear 
-		END AS end_year,
-		pa.currentyear AS currentyear, 
-		CASE 
-			WHEN pa.end_quality_class::TEXT = p.quality_class::TEXT THEN pa.start_quality_class::TEXT 
-			ELSE p.quality_class 
-		END AS start_quality_class,
-		p.quality_class AS end_quality_class,
-		CASE WHEN p.currentyear = lastyear_val.newyear THEN TRUE ELSE FALSE END AS start_isactive,
-		NULL AS end_isactive
-	FROM present p
-	FULL OUTER JOIN past pa ON pa.actorid = p.actorid,lastyear_val 
+    SELECT 
+        actor, 
+        actorid, 
+        currentyear,
+        AVG(filmrating) AS avg_rating
+    FROM unnestedrating
+    GROUP BY actor, actorid, currentyear
+),
+
+-- Assign quality class based on average rating for new year
+present AS (
+    SELECT 
+        actor,
+        actorid,
+        currentyear,
+        CASE 
+            WHEN ar.avg_rating > 8 THEN 'star'
+            WHEN ar.avg_rating > 7 THEN 'good'
+            WHEN ar.avg_rating > 6 THEN 'average'
+            ELSE 'bad'
+        END AS quality_class 
+    FROM presentaggdata ar
+),
+
+-- Merge old data with new data, adjusting the SCD start/end years and quality class
+newdata AS (
+    SELECT 
+        p.actorid, 
+        p.actor, 
+        CASE 
+            -- If quality class unchanged, keep the original start year
+            WHEN pa.end_quality_class::TEXT = p.quality_class::TEXT THEN pa.start_year
+            -- Otherwise, set start year to the new year
+            ELSE pa.newyear 
+        END AS start_year,
+        CASE 
+            -- If quality class unchanged, update end year to the new year
+            WHEN pa.end_quality_class::TEXT = p.quality_class::TEXT THEN lastyear_val.newyear
+            -- Otherwise, set end year to the new year (start a new range)
+            ELSE lastyear_val.newyear 
+        END AS end_year,
+        pa.currentyear AS currentyear, 
+        CASE 
+            -- Keep old start quality class if unchanged
+            WHEN pa.end_quality_class::TEXT = p.quality_class::TEXT THEN pa.start_quality_class::TEXT 
+            -- Otherwise, use the new quality class
+            ELSE p.quality_class 
+        END AS start_quality_class,
+        p.quality_class AS end_quality_class,
+        CASE WHEN p.currentyear = lastyear_val.newyear THEN TRUE ELSE FALSE END AS start_isactive,
+        NULL AS end_isactive
+    FROM present p
+    FULL OUTER JOIN past pa ON pa.actorid = p.actorid, lastyear_val 
 )
-
-
-
